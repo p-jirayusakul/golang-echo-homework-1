@@ -1,8 +1,7 @@
 package utils
 
 import (
-	"encoding/json"
-	"net/http"
+	"github.com/labstack/echo/v4"
 )
 
 type SuccessResponse struct {
@@ -16,27 +15,10 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-func RespondWithError(w http.ResponseWriter, code int, errorMessage string) {
-
-	jsonResponse := ErrorResponse{
-		Message: errorMessage,
-		Status:  false,
-	}
-	response, _ := json.Marshal(jsonResponse)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(response)
+func RespondWithError(c echo.Context, code int, message string) error {
+	return c.JSON(code, ErrorResponse{Message: message, Status: false})
 }
 
-func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, _ := json.Marshal(SuccessResponse{
-		Message: "Success",
-		Data:    payload,
-		Status:  true,
-	})
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(response)
+func RespondWithJSON(c echo.Context, code int, payload interface{}) error {
+	return c.JSON(code, SuccessResponse{Message: "success", Status: true, Data: payload})
 }

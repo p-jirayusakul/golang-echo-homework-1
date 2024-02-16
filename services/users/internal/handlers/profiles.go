@@ -30,27 +30,29 @@ func NewUserHttpHandler(
 }
 
 func (h *ProfilesHandler) createProfiles(c echo.Context) error {
-	var body request.CreateProfilesReqiest
+	var r request.CreateProfilesReqiest
 
-	err := c.Bind(&body)
+	err := c.Bind(&r)
 	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err = c.Validate(r); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	arg := entities.Profiles{
-		FirstName: body.FirstName,
-		LastName:  body.LastName,
-		Email:     body.Email,
-		Phone:     body.Phone,
+		FirstName: r.FirstName,
+		LastName:  r.LastName,
+		Email:     r.Email,
+		Phone:     r.Phone,
 	}
 
 	err = h.profilesUsecase.Create(arg)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, utils.ErrorResponse{
-		Status:  true,
-		Message: "success",
-	})
+	var payload interface{}
+	return utils.RespondWithJSON(c, http.StatusOK, payload)
 }
