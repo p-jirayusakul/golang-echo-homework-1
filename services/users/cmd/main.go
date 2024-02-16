@@ -26,6 +26,7 @@ func main() {
 	db := config.InitDatabase()
 	repoProfile := repositories.NewProfileRepository(db)
 	repoAccount := repositories.NewAccountRepository(db)
+	repoAddress := repositories.NewAddressRepository(db)
 
 	// Middlewere
 	app.Validator = validator.NewCustomValidator()
@@ -35,6 +36,6 @@ func main() {
 	app.Use(pkg_middleware.LogHandler(logger))
 
 	// Handler
-	user_handler.NewUserHttpHandler(app, &repoProfile, &repoAccount)
+	user_handler.NewUserHttpHandler(app, &repoProfile, &repoAccount, &repoAddress)
 	app.Logger.Fatal(app.Start(":3000"))
 }

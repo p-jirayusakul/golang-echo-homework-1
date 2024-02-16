@@ -1,6 +1,6 @@
 package request
 
-type CreateProfilesReqiest struct {
+type CreateProfilesRequest struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 	Email     string `json:"email" validate:"email"`
