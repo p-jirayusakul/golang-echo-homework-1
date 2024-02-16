@@ -18,12 +18,12 @@ func NewProfilesInteractor(
 	}
 }
 
-func (x *profilesInteractor) Create(arg entities.Profiles) error {
+func (x *profilesInteractor) Create(arg entities.Profiles) (err error) {
 
-	err := x.profilesRepo.Create(arg)
+	err = x.profilesRepo.Create(arg)
 	if err != nil {
-		return err
+		return
 	}
 
-	return nil
+	return
 }

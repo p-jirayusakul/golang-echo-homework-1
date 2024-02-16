@@ -16,6 +16,7 @@ func NewProfileRepository(db *gorm.DB) ProfilesRepository {
 
 func (x *ProfilesRepository) Create(payload entities.Profiles) error {
 	arg := models.Profiles{
+		UserID:    payload.UserID,
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
 		Email:     payload.Email,
