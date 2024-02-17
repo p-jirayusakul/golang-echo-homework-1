@@ -5,6 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/configs"
+	pkg_middleware "github.com/p-jirayusakul/golang-echo-homework-1/pkg/middleware"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/utils"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/domain/entities"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/domain/usecases"
@@ -34,6 +36,8 @@ func NewUserHttpHandler(
 	}
 
 	g := app.Group("/users")
+	g.Use(pkg_middleware.ConfigJWT(configs.Config.JWT_SECRET))
+
 	g.POST("/profiles", handler.createProfiles)
 	g.GET("/profiles/:user_id", handler.findProfiles)
 	g.PATCH("/profiles", handler.updateProfile)
@@ -74,7 +78,7 @@ func (h *UserHandler) createProfiles(c echo.Context) error {
 	}
 
 	var payload interface{}
-	return utils.RespondWithJSON(c, http.StatusOK, payload)
+	return utils.RespondWithJSON(c, http.StatusCreated, payload)
 }
 
 func (h *UserHandler) findProfiles(c echo.Context) error {
@@ -114,7 +118,7 @@ func (h *UserHandler) updateProfile(c echo.Context) error {
 		LastName:  r.LastName,
 	}
 
-	uid := "3780237c-168d-417b-9a09-39e8cf68831a"
+	uid := pkg_middleware.DecodeToken(c)
 
 	var userId uuid.UUID
 	userId.Scan(uid)
@@ -133,7 +137,7 @@ func (h *UserHandler) deleteProfiles(c echo.Context) error {
 
 	arg := entities.DeleteProfilesDTO{}
 
-	uid := "3780237c-168d-417b-9a09-39e8cf68831a"
+	uid := pkg_middleware.DecodeToken(c)
 
 	var userId uuid.UUID
 	userId.Scan(uid)
@@ -160,8 +164,11 @@ func (h *UserHandler) createAddress(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	r.UserID = pkg_middleware.DecodeToken(c)
+
 	var userId uuid.UUID
 	userId.Scan(r.UserID)
+
 	arg := entities.Address{
 		UserID:   userId,
 		AddrType: r.AddrType,
@@ -177,7 +184,7 @@ func (h *UserHandler) createAddress(c echo.Context) error {
 	}
 
 	var payload interface{}
-	return utils.RespondWithJSON(c, http.StatusOK, payload)
+	return utils.RespondWithJSON(c, http.StatusCreated, payload)
 }
 
 func (h *UserHandler) findAddress(c echo.Context) error {
@@ -224,7 +231,7 @@ func (h *UserHandler) updateAddress(c echo.Context) error {
 		State:     r.State,
 	}
 
-	uid := "3780237c-168d-417b-9a09-39e8cf68831a"
+	uid := pkg_middleware.DecodeToken(c)
 
 	var userId uuid.UUID
 	userId.Scan(uid)

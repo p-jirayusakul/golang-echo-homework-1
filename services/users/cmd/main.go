@@ -36,5 +36,5 @@ func main() {
 
 	// Handler
 	user_handler.NewUserHttpHandler(app, &repoProfile, &repoAddress)
-	app.Logger.Fatal(app.Start(":3000"))
+	app.Logger.Fatal(app.Start(":3002"))
 }

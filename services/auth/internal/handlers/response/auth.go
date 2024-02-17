@@ -1,7 +1,7 @@
 package response
 
 type RegisterResponse struct {
-	UserID string `json:"userId"`
+	ID string `json:"id"`
 }
 
 type LoginResponse struct {

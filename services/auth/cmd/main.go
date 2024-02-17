@@ -35,5 +35,5 @@ func main() {
 
 	// Handler
 	user_handler.NewAuthHttpHandler(app, &repoAccount)
-	app.Logger.Fatal(app.Start(":3000"))
+	app.Logger.Fatal(app.Start(":3001"))
 }

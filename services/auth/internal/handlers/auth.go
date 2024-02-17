@@ -3,9 +3,12 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/common"
+	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/configs"
+	pkg_middleware "github.com/p-jirayusakul/golang-echo-homework-1/pkg/middleware"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/utils"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/entities"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/usecases"
@@ -56,9 +59,10 @@ func (h *AuthHandler) createRegister(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	var payload response.RegisterResponse
-	payload.UserID = id
-	return utils.RespondWithJSON(c, http.StatusOK, payload)
+	payload := response.RegisterResponse{
+		ID: id,
+	}
+	return utils.RespondWithJSON(c, http.StatusCreated, payload)
 }
 
 func (h *AuthHandler) login(c echo.Context) error {
@@ -86,6 +90,18 @@ func (h *AuthHandler) login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, common.ErrLoginFail.Error())
 	}
 
+	token, err := pkg_middleware.CreateToken(pkg_middleware.CreateTokenDTO{
+		UserID:    result.UserID.String(),
+		ExpiresAt: time.Now().Add(time.Hour * 2),
+		Secret:    configs.Config.JWT_SECRET,
+	})
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	var payload response.LoginResponse
+	payload.Token = token
+
 	return utils.RespondWithJSON(c, http.StatusOK, payload)
 }
