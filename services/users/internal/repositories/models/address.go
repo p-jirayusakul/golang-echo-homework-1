@@ -8,8 +8,8 @@ import (
 )
 
 type Address struct {
-	AddressId uuid.UUID `gorm:"primarykey,type:uuid;default:uuid_generate_v4()"`
-	UserID    uuid.UUID
+	AddressId uuid.UUID `gorm:"primarykey,type:uuid;default:uuid_generate_v4();uniqueIndex:pk_address_id,sort:desc"`
+	UserID    uuid.UUID `gorm:"column:user_id"`
 	AddrType  string
 	AddrNo    string
 	Street    string

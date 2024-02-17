@@ -19,30 +19,28 @@ func NewAccountRepository(db *gorm.DB) AccountsRepository {
 }
 
 func (x *AccountsRepository) Create(payload entities.Accounts) (uuid.UUID, error) {
-	arg := models.Accounts{
+	data := models.Accounts{
 		Email:    payload.Email,
 		Password: payload.Password,
 	}
 
-	result := x.db.Create(&arg)
+	result := x.db.Create(&data)
 
-	return arg.UserID, result.Error
+	return data.UserID, result.Error
 }
 
-func (x *AccountsRepository) Find(email string) (entities.Accounts, error) {
-	arg := models.Accounts{
-		Email: email,
-	}
+func (x *AccountsRepository) Read(email string) (entities.Accounts, error) {
+	data := models.Accounts{}
 
-	result := x.db.First(&arg)
+	result := x.db.Where("email = ?", email).First(&data)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return entities.Accounts{}, common.ErrDataNotFound
 	}
 
 	account := entities.Accounts{
-		UserID:   arg.UserID,
-		Email:    arg.Email,
-		Password: arg.Password,
+		UserID:   data.UserID,
+		Email:    data.Email,
+		Password: data.Password,
 	}
 
 	return account, result.Error

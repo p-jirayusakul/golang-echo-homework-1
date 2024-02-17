@@ -11,3 +11,7 @@ type Address struct {
 	City      string    `json:"city"`
 	State     string    `json:"state"`
 }
+
+type DeleteAddressDTO struct {
+	AddressId uuid.UUID `json:"addressId"`
+}

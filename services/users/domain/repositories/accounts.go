@@ -7,5 +7,5 @@ import (
 
 type AccountsRepository interface {
 	Create(payload entities.Accounts) (uuid.UUID, error)
-	Find(email string) (entities.Accounts, error)
+	Read(email string) (entities.Accounts, error)
 }

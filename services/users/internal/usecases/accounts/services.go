@@ -27,7 +27,7 @@ func NewAccountsInteractor(
 
 func (x *accountsInteractor) Create(arg entities.Accounts) (err error) {
 
-	_, err = x.accountsRepo.Find(arg.Email)
+	_, err = x.accountsRepo.Read(arg.Email)
 	if err != nil {
 		if !errors.Is(err, common.ErrDataNotFound) {
 			return
