@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/configs"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/repositories/models"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories/models"
 )
 
 func InitDatabase() *gorm.DB {
@@ -18,7 +18,7 @@ func InitDatabase() *gorm.DB {
 		panic(err)
 	}
 
-	db.AutoMigrate(&models.Profiles{}, &models.Address{})
+	db.AutoMigrate(&models.Accounts{})
 
 	return db
 }

@@ -5,27 +5,24 @@ import (
 
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/common"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/utils"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/domain/entities"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/domain/repositories"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/entities"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/repositories"
 )
 
 type accountsInteractor struct {
 	accountsRepo repositories.AccountsRepository
-	profilesRepo repositories.ProfilesRepository
 }
 
 func NewAccountsInteractor(
 	accountsRepo repositories.AccountsRepository,
-	profilesRepo repositories.ProfilesRepository,
 ) *accountsInteractor {
 
 	return &accountsInteractor{
 		accountsRepo: accountsRepo,
-		profilesRepo: profilesRepo,
 	}
 }
 
-func (x *accountsInteractor) Create(arg entities.Accounts) (err error) {
+func (x *accountsInteractor) Create(arg entities.Accounts) (id string, err error) {
 
 	_, err = x.accountsRepo.Read(arg.Email)
 	if err != nil {
@@ -49,11 +46,13 @@ func (x *accountsInteractor) Create(arg entities.Accounts) (err error) {
 		return
 	}
 
-	var profiles entities.Profiles
-	profiles.Email = arg.Email
-	profiles.UserID = userId
+	id = userId.String()
+	return
+}
 
-	err = x.profilesRepo.Create(profiles)
+func (x *accountsInteractor) Read(email string) (result entities.Accounts, err error) {
+
+	result, err = x.accountsRepo.Read(email)
 	if err != nil {
 		return
 	}

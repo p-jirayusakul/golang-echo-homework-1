@@ -9,9 +9,9 @@ import (
 	pkg_middleware "github.com/p-jirayusakul/golang-echo-homework-1/pkg/middleware"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/validator"
 
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/config"
-	user_handler "github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/handlers"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/repositories"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/config"
+	user_handler "github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/handlers"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories"
 )
 
 func main() {
@@ -24,8 +24,7 @@ func main() {
 
 	// Repository
 	db := config.InitDatabase()
-	repoProfile := repositories.NewProfileRepository(db)
-	repoAddress := repositories.NewAddressRepository(db)
+	repoAccount := repositories.NewAccountRepository(db)
 
 	// Middlewere
 	app.Validator = validator.NewCustomValidator()
@@ -35,6 +34,6 @@ func main() {
 	app.Use(pkg_middleware.LogHandler(logger))
 
 	// Handler
-	user_handler.NewUserHttpHandler(app, &repoProfile, &repoAddress)
+	user_handler.NewAuthHttpHandler(app, &repoAccount)
 	app.Logger.Fatal(app.Start(":3000"))
 }

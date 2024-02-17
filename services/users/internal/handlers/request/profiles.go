@@ -1,6 +1,7 @@
 package request
 
 type CreateProfilesRequest struct {
+	UserID    string `json:"userId" validate:"uuid4"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 	Email     string `json:"email" validate:"email"`

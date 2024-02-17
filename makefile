@@ -4,4 +4,7 @@ export
 profiles:
 	go run services/users/cmd/main.go
 
-.PHONY: profiles
+auth:
+	go run services/auth/cmd/main.go
+
+.PHONY: profiles auth
