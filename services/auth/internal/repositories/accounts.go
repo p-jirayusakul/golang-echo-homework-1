@@ -45,3 +45,17 @@ func (x *AccountsRepository) Read(email string) (entities.Accounts, error) {
 
 	return account, result.Error
 }
+
+func (x *AccountsRepository) UpdatePassword(arg entities.UpdatePasswordAccountDTO) error {
+	data := models.Accounts{}
+
+	result := x.db.Where("user_id = ?", arg.UserID).First(&data)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return common.ErrDataNotFound
+	}
+
+	data.UserID = arg.UserID
+	data.Password = arg.Password
+
+	return x.db.Model(models.Accounts{}).Where("user_id = ?", data.UserID).Updates(data).Error
+}

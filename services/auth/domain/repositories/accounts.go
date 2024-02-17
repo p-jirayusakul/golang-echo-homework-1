@@ -8,4 +8,5 @@ import (
 type AccountsRepository interface {
 	Create(payload entities.Accounts) (uuid.UUID, error)
 	Read(email string) (entities.Accounts, error)
+	UpdatePassword(arg entities.UpdatePasswordAccountDTO) error
 }

@@ -16,6 +16,7 @@ type envConfigs struct {
 	DATABASE_PASSWORD string `mapstructure:"DATABASE_PASSWORD"`
 	DATABASE_NAME     string `mapstructure:"DATABASE_NAME"`
 	JWT_SECRET        string `mapstructure:"JWT_SECRET"`
+	SECRET_KEY        string `mapstructure:"SECRET_KEY"`
 }
 
 // Call to load the variables from env

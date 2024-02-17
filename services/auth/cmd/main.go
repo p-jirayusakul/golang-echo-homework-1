@@ -25,6 +25,7 @@ func main() {
 	// Repository
 	db := config.InitDatabase()
 	repoAccount := repositories.NewAccountRepository(db)
+	repoResetPassword := repositories.NewResetPasswordRepository(db)
 
 	// Middlewere
 	app.Validator = validator.NewCustomValidator()
@@ -34,6 +35,6 @@ func main() {
 	app.Use(pkg_middleware.LogHandler(logger))
 
 	// Handler
-	user_handler.NewAuthHttpHandler(app, &repoAccount)
+	user_handler.NewAuthHttpHandler(app, &repoAccount, &repoResetPassword)
 	app.Logger.Fatal(app.Start(":3001"))
 }

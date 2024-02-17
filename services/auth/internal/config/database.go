@@ -18,7 +18,7 @@ func InitDatabase() *gorm.DB {
 		panic(err)
 	}
 
-	db.AutoMigrate(&models.Accounts{})
+	db.AutoMigrate(&models.Accounts{}, &models.ResetPassword{})
 
 	return db
 }

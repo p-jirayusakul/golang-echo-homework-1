@@ -16,18 +16,26 @@ import (
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/handlers/response"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/usecases/accounts"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/usecases/reset_password"
 )
 
 type AuthHandler struct {
-	accountsUsecase usecases.AccountsUsecase
+	accountsUsecase      usecases.AccountsUsecase
+	resetPasswordUsecase usecases.ResetPasswordUsecase
 }
 
 func NewAuthHttpHandler(
 	app *echo.Echo,
 	accountsRepo *repositories.AccountsRepository,
+	resetPasswordRepo *repositories.ResetPasswordRepository,
 ) {
 	handler := &AuthHandler{
 		accountsUsecase: accounts.NewAccountsInteractor(
+			accountsRepo,
+			resetPasswordRepo,
+		),
+		resetPasswordUsecase: reset_password.NewResetPasswordInteractor(
+			resetPasswordRepo,
 			accountsRepo,
 		),
 	}
@@ -35,6 +43,8 @@ func NewAuthHttpHandler(
 	g := app.Group("/auth")
 	g.POST("/register", handler.createRegister)
 	g.POST("/login", handler.login)
+	g.POST("/request-reset-password", handler.requestResetPassword)
+	g.POST("/reset-password", handler.resetPassword)
 }
 
 func (h *AuthHandler) createRegister(c echo.Context) error {
@@ -104,4 +114,63 @@ func (h *AuthHandler) login(c echo.Context) error {
 	payload.Token = token
 
 	return utils.RespondWithJSON(c, http.StatusOK, payload)
+}
+
+func (h *AuthHandler) requestResetPassword(c echo.Context) error {
+	var r request.RequestResetPasswordRequest
+
+	err := c.Bind(&r)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err = c.Validate(r); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	arg := entities.ResetPassword{
+		Email: r.Email,
+	}
+
+	id, err := h.resetPasswordUsecase.Create(arg)
+	if err != nil {
+		if errors.Is(err, common.ErrDataNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	payload := response.ResetPasswordResponse{
+		RequestID: id,
+	}
+	return utils.RespondWithJSON(c, http.StatusCreated, payload)
+}
+
+func (h *AuthHandler) resetPassword(c echo.Context) error {
+	var r request.ResetPasswordRequest
+
+	err := c.Bind(&r)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err = c.Validate(r); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	arg := entities.UpdatePasswordAccountDTO{
+		RequestID: r.RequestID,
+		Password:  r.Password,
+	}
+
+	err = h.accountsUsecase.UpdatePassword(arg)
+	if err != nil {
+		if errors.Is(err, common.ErrDataNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	var payload interface{}
+	return utils.RespondWithJSON(c, http.StatusCreated, payload)
 }
