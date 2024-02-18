@@ -56,8 +56,5 @@ func LoadConfig() (err error) {
 		return
 	}
 
-	fmt.Println("Config DATABASE_NAME", Config.DATABASE_NAME)
-	fmt.Println("Config DATABASE_NAME", Config.DATABASE_USER)
-
 	return
 }
