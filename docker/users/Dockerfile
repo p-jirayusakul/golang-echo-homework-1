@@ -13,7 +13,7 @@ RUN rm go.sum
 
 RUN go get -d -v ./...
 
-WORKDIR /go/src/app/services/user/cmd
+WORKDIR /go/src/app/services/users/cmd
 
 RUN CGO_ENABLED=0 go build -o /go/bin/app
 

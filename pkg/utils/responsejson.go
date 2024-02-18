@@ -5,20 +5,20 @@ import (
 )
 
 type SuccessResponse struct {
-	Status  bool        `json:"status"`
+	Status  string      `json:"status"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
 
 type ErrorResponse struct {
-	Status  bool   `json:"status"`
+	Status  string `json:"status"`
 	Message string `json:"message"`
 }
 
 func RespondWithError(c echo.Context, code int, message string) error {
-	return c.JSON(code, ErrorResponse{Message: message, Status: false})
+	return c.JSON(code, ErrorResponse{Message: message, Status: "error"})
 }
 
 func RespondWithJSON(c echo.Context, code int, payload interface{}) error {
-	return c.JSON(code, SuccessResponse{Message: "success", Status: true, Data: payload})
+	return c.JSON(code, SuccessResponse{Message: "success", Status: "success", Data: payload})
 }

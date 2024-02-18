@@ -1,42 +1,69 @@
-version: '3.9'
+version: "3.9"
+
 services:
 
-  user_service:
-    container_name: user_service
-    environment:
-      - DATABASE_USER=postgres
-      - DATABASE_HOST=postgresdb
-      - DATABASE_NAME=homework1
-      - DATABASE_PASSWORD=1234
-      - DATABASE_PORT=5432
-      - JWT_SECRET=secret
+  postgres:
+      image: postgres:16.2-alpine3.19
+      container_name: postgres_container
+      environment:
+        POSTGRES_USER: 'postgres'
+        POSTGRES_PASSWORD: '1234'
+        POSTGRES_DB: 'homework1'
+      ports:
+        - 5432:5432
+      networks:
+        - homework1
+      volumes:
+        - ./database/postgres/docker-entrypoint-initdb:/docker-entrypoint-initdb.d/
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+
+  auth-go:
+    container_name: arch_auth_go
     build:
       context: .
-      dockerfile: docker/user/Dockerfile
-    ports:
-      - 3000:3000
-    restart: on-failure
-    depends_on:
-      - postgresdb
-    networks:
-      - homework1
-
-  postgresdb:
-    image: postgres:16.2-alpine3.19
-    container_name: postgres_container
+      dockerfile: docker/auth/Dockerfile
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=1234
-      - POSTGRES_DB=homework1
+      JWT_SECRET: UucwjDH7AY40XLDyWpBUalCB151WgAfF
+      SECRET_KEY: L1K0zInpkIYzVXqUQdvnOc7FtbKOvpsJ
+      DATABASE_USER: 'postgres'
+      DATABASE_HOST: 'postgres'
+      DATABASE_PASSWORD: '1234'
+      DATABASE_PORT: 5432
+      DATABASE_NAME: 'homework1'
     ports:
-      - 5432:5432
+      - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - homework1
+    restart: always
 
-volumes:
-  pg_data:
+  user-go:
+    container_name: arch_user_go
+    build:
+      context: .
+      dockerfile: docker/users/Dockerfile
+    environment:
+      JWT_SECRET: UucwjDH7AY40XLDyWpBUalCB151WgAfF
+      SECRET_KEY: L1K0zInpkIYzVXqUQdvnOc7FtbKOvpsJ
+      DATABASE_USER: 'postgres'
+      DATABASE_HOST: 'postgres'
+      DATABASE_PASSWORD: '1234'
+      DATABASE_PORT: 5432
+      DATABASE_NAME: 'homework1'
+    ports:
+      - '3002:3002'
+    depends_on:
+      - postgres
+    networks:
+      - homework1
+    restart: always
 
-# Networks to be created to facilitate communication between containers
 networks:
   homework1:
     driver: bridge

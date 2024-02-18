@@ -33,7 +33,7 @@ func (x *ResetPasswordRepository) Create(payload entities.ResetPassword) (uuid.U
 func (x *ResetPasswordRepository) Read(requestId uuid.UUID) (entities.ResetPassword, error) {
 	data := models.ResetPassword{}
 
-	result := x.db.Where("request_id = ?", requestId).First(&data)
+	result := x.db.Where("request_id = ? AND done IS FALSE", requestId).First(&data)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return entities.ResetPassword{}, common.ErrDataNotFound
 	}

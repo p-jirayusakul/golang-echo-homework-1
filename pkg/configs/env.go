@@ -2,6 +2,8 @@ package configs
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/spf13/viper"
 )
@@ -21,24 +23,41 @@ type envConfigs struct {
 
 // Call to load the variables from env
 func LoadConfig() (err error) {
-	// Set the name of the env file
-	viper.SetConfigFile(".env")
 
-	// Allow viper to read environment variables
-	viper.AutomaticEnv()
+	fileName := ".env"
+	if _, err := os.Stat(fileName); err == nil {
+		viper.SetConfigFile(fileName)
+		err = viper.ReadInConfig()
+		if err != nil {
+			fmt.Println("Error reading .env file:", err)
+			return err
+		}
+	} else if os.IsNotExist(err) {
+		viper.AutomaticEnv()
 
-	// Read the env file
-	err = viper.ReadInConfig()
-	if err != nil {
-		fmt.Println("Error reading .env file:", err)
-		return
+		// Define default values (optional)
+		DATABASE_PORT := os.Getenv("DATABASE_PORT")
+		DATABASE_PORT_NUM, err := strconv.Atoi(DATABASE_PORT)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return err
+		}
+		viper.SetDefault("DATABASE_PORT", int32(DATABASE_PORT_NUM))
+		viper.SetDefault("DATABASE_USER", os.Getenv("DATABASE_USER"))
+		viper.SetDefault("DATABASE_HOST", os.Getenv("DATABASE_HOST"))
+		viper.SetDefault("DATABASE_PASSWORD", os.Getenv("DATABASE_PASSWORD"))
+		viper.SetDefault("DATABASE_NAME", os.Getenv("DATABASE_NAME"))
+		viper.SetDefault("JWT_SECRET", os.Getenv("JWT_SECRET"))
+		viper.SetDefault("SECRET_KEY", os.Getenv("SECRET_KEY"))
 	}
 
-	// Viper unmarshals the loaded env varialbes into the struct
 	if err = viper.Unmarshal(&Config); err != nil {
 		fmt.Println("Error reading .env file:", err)
 		return
 	}
+
+	fmt.Println("Config DATABASE_NAME", Config.DATABASE_NAME)
+	fmt.Println("Config DATABASE_NAME", Config.DATABASE_USER)
 
 	return
 }
