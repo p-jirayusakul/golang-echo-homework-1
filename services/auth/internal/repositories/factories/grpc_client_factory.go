@@ -2,7 +2,7 @@ package factories
 
 import (
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/repositories"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/handlers/grpc_client"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/delivery/grpc_client"
 	repository_grpc "github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories/grpc"
 )
 

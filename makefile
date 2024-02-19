@@ -1,5 +1,3 @@
-include .env
-export
 
 auth:
 	go run services/auth/cmd/main.go

@@ -25,6 +25,12 @@ func DatabasePostgres(filename string) DatabasePostgresConfig {
 	if _, err := os.Stat(filename); err == nil {
 		viper.SetConfigFile(filename)
 		viper.ReadInConfig()
+	} else {
+		viper.SetDefault("DATABASE_HOST", os.Getenv("DATABASE_HOST"))
+		viper.SetDefault("DATABASE_PORT", ConvertInt("DATABASE_PORT"))
+		viper.SetDefault("DATABASE_NAME", os.Getenv("DATABASE_NAME"))
+		viper.SetDefault("DATABASE_USER", os.Getenv("DATABASE_USER"))
+		viper.SetDefault("DATABASE_PASSWORD", os.Getenv("DATABASE_PASSWORD"))
 	}
 
 	var config DatabasePostgresConfig

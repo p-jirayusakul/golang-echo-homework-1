@@ -47,7 +47,7 @@ func main() {
 	initHandler(app, cfg)
 
 	// Handler
-	app.Logger.Fatal(app.Start(":" + cfg.HTTP_PORT))
+	app.Logger.Fatal(app.Start(cfg.HTTP_PORT))
 }
 
 func RunGrpcServer() {

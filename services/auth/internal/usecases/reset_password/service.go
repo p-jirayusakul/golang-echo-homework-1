@@ -5,25 +5,28 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/configs"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/utils"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/entities"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/repositories"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/config"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories/factories"
 )
 
 type resetPasswordInteractor struct {
+	cfg               *config.AuthConfig
 	resetPasswordRepo repositories.ResetPasswordRepository
 	accountsRepo      repositories.AccountsRepository
 }
 
 func NewResetPasswordInteractor(
-	resetPasswordRepo repositories.ResetPasswordRepository,
-	accountsRepo repositories.AccountsRepository,
+	config *config.AuthConfig,
+	dbFactory *factories.DBFactory,
 ) *resetPasswordInteractor {
 
 	return &resetPasswordInteractor{
-		resetPasswordRepo: resetPasswordRepo,
-		accountsRepo:      accountsRepo,
+		cfg:               config,
+		resetPasswordRepo: dbFactory.ResetPasswordRepo,
+		accountsRepo:      dbFactory.AccountsRepo,
 	}
 }
 
@@ -41,7 +44,7 @@ func (x *resetPasswordInteractor) Create(arg entities.ResetPassword) (id string,
 		return
 	}
 
-	id, err = utils.ChiperEncrypt(requestId.String(), configs.Config.SECRET_KEY)
+	id, err = utils.ChiperEncrypt(requestId.String(), x.cfg.SECRET_KEY)
 	if err != nil {
 		return
 	}
@@ -51,7 +54,7 @@ func (x *resetPasswordInteractor) Create(arg entities.ResetPassword) (id string,
 
 func (x *resetPasswordInteractor) Read(requestId string) (result entities.ResetPassword, err error) {
 
-	id, err := utils.ChiperDecrypt(requestId, configs.Config.SECRET_KEY)
+	id, err := utils.ChiperDecrypt(requestId, x.cfg.SECRET_KEY)
 	if err != nil {
 		return
 	}

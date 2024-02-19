@@ -2,7 +2,6 @@ package address
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/configs"
 	pkg_middleware "github.com/p-jirayusakul/golang-echo-homework-1/pkg/middleware"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/domain/usecases"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/config"
@@ -30,7 +29,7 @@ func NewAddressHttpHandler(
 	}
 
 	g := app.Group("/users")
-	g.Use(pkg_middleware.ConfigJWT(configs.Config.JWT_SECRET))
+	g.Use(pkg_middleware.ConfigJWT(config.JWT_SECRET))
 
 	g.POST("/address", handler.createAddress)
 	g.GET("/address/:address_id", handler.findAddress)

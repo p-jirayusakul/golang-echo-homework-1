@@ -34,8 +34,8 @@ services:
       DATABASE_PASSWORD: '1234'
       DATABASE_PORT: 5432
       DATABASE_NAME: 'homework1'
-      RPC_USERS: 'user-go:9083'
-      RPC_USERS_PORT: ':9083'
+      HTTP_PORT: 'auth-go:3001'
+      RPC_USERS: 'user-go:9082'
     ports:
       - '3001:3001'
     depends_on:
@@ -58,8 +58,8 @@ services:
       DATABASE_PASSWORD: '1234'
       DATABASE_PORT: 5432
       DATABASE_NAME: 'homework1'
-      RPC_USERS: 'user-go:9083'
-      RPC_USERS_PORT: ':9083'
+      HTTP_PORT: 'user-go:3002'
+      RPC_PORT: 'user-go:9082'
     ports:
       - '3002:3002'
     depends_on:

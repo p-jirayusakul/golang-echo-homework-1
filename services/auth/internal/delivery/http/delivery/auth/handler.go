@@ -1,4 +1,4 @@
-package handlers
+package auth
 
 import (
 	"errors"
@@ -7,50 +7,14 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/common"
-	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/configs"
 	pkg_middleware "github.com/p-jirayusakul/golang-echo-homework-1/pkg/middleware"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/utils"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/entities"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/usecases"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/handlers/request"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/handlers/response"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories/factories"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/usecases/accounts"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/usecases/reset_password"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/delivery/http/request"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/delivery/http/response"
 )
 
-type AuthHandler struct {
-	accountsUsecase      usecases.AccountsUsecase
-	resetPasswordUsecase usecases.ResetPasswordUsecase
-}
-
-func NewAuthHttpHandler(
-	app *echo.Echo,
-	accountsRepo *repositories.AccountsRepository,
-	resetPasswordRepo *repositories.ResetPasswordRepository,
-	grpcFactory *factories.GrpcClientFactory,
-) {
-	handler := &AuthHandler{
-		accountsUsecase: accounts.NewAccountsInteractor(
-			accountsRepo,
-			resetPasswordRepo,
-			grpcFactory,
-		),
-		resetPasswordUsecase: reset_password.NewResetPasswordInteractor(
-			resetPasswordRepo,
-			accountsRepo,
-		),
-	}
-
-	g := app.Group("/auth")
-	g.POST("/register", handler.createRegister)
-	g.POST("/login", handler.login)
-	g.POST("/request-reset-password", handler.requestResetPassword)
-	g.POST("/reset-password", handler.resetPassword)
-}
-
-func (h *AuthHandler) createRegister(c echo.Context) error {
+func (h *AccountsHttpHandler) createRegister(c echo.Context) error {
 	var r request.RegisterRequest
 
 	err := c.Bind(&r)
@@ -67,7 +31,7 @@ func (h *AuthHandler) createRegister(c echo.Context) error {
 		Password: r.Password,
 	}
 
-	id, err := h.accountsUsecase.Create(arg)
+	id, err := h.AccountsUsecase.Create(arg)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -78,7 +42,7 @@ func (h *AuthHandler) createRegister(c echo.Context) error {
 	return utils.RespondWithJSON(c, http.StatusCreated, payload)
 }
 
-func (h *AuthHandler) login(c echo.Context) error {
+func (h *AccountsHttpHandler) login(c echo.Context) error {
 	var r request.LoginRequest
 
 	err := c.Bind(&r)
@@ -90,7 +54,7 @@ func (h *AuthHandler) login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	result, err := h.accountsUsecase.Read(r.Email)
+	result, err := h.AccountsUsecase.Read(r.Email)
 	if err != nil {
 		if errors.Is(err, common.ErrDataNotFound) {
 			return echo.NewHTTPError(http.StatusUnauthorized, common.ErrLoginFail.Error())
@@ -106,7 +70,7 @@ func (h *AuthHandler) login(c echo.Context) error {
 	token, err := pkg_middleware.CreateToken(pkg_middleware.CreateTokenDTO{
 		UserID:    result.UserID.String(),
 		ExpiresAt: time.Now().Add(time.Hour * 2),
-		Secret:    configs.Config.JWT_SECRET,
+		Secret:    h.Cfg.JWT_SECRET,
 	})
 
 	if err != nil {
@@ -119,7 +83,7 @@ func (h *AuthHandler) login(c echo.Context) error {
 	return utils.RespondWithJSON(c, http.StatusOK, payload)
 }
 
-func (h *AuthHandler) requestResetPassword(c echo.Context) error {
+func (h *AccountsHttpHandler) requestResetPassword(c echo.Context) error {
 	var r request.RequestResetPasswordRequest
 
 	err := c.Bind(&r)
@@ -135,7 +99,7 @@ func (h *AuthHandler) requestResetPassword(c echo.Context) error {
 		Email: r.Email,
 	}
 
-	id, err := h.resetPasswordUsecase.Create(arg)
+	id, err := h.ResetPasswordUsecase.Create(arg)
 	if err != nil {
 		if errors.Is(err, common.ErrDataNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
@@ -149,7 +113,7 @@ func (h *AuthHandler) requestResetPassword(c echo.Context) error {
 	return utils.RespondWithJSON(c, http.StatusCreated, payload)
 }
 
-func (h *AuthHandler) resetPassword(c echo.Context) error {
+func (h *AccountsHttpHandler) resetPassword(c echo.Context) error {
 	var r request.ResetPasswordRequest
 
 	err := c.Bind(&r)
@@ -166,7 +130,7 @@ func (h *AuthHandler) resetPassword(c echo.Context) error {
 		Password:  r.Password,
 	}
 
-	err = h.accountsUsecase.UpdatePassword(arg)
+	err = h.AccountsUsecase.UpdatePassword(arg)
 	if err != nil {
 		if errors.Is(err, common.ErrDataNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())

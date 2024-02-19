@@ -6,7 +6,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/common"
-	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/configs"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/config"
+
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/utils"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/entities"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/repositories"
@@ -14,20 +15,22 @@ import (
 )
 
 type accountsInteractor struct {
+	cfg               *config.AuthConfig
 	accountsRepo      repositories.AccountsRepository
 	resetPasswordRepo repositories.ResetPasswordRepository
 	usersGrpcRepo     repositories.UsersRepository
 }
 
 func NewAccountsInteractor(
-	accountsRepo repositories.AccountsRepository,
-	resetPasswordRepo repositories.ResetPasswordRepository,
+	config *config.AuthConfig,
+	dbFactory *factories.DBFactory,
 	grpcFactory *factories.GrpcClientFactory,
 ) *accountsInteractor {
 
 	return &accountsInteractor{
-		accountsRepo:      accountsRepo,
-		resetPasswordRepo: resetPasswordRepo,
+		cfg:               config,
+		accountsRepo:      dbFactory.AccountsRepo,
+		resetPasswordRepo: dbFactory.ResetPasswordRepo,
 		usersGrpcRepo:     grpcFactory.UsersRepo,
 	}
 }
@@ -83,7 +86,7 @@ func (x *accountsInteractor) Read(email string) (result entities.Accounts, err e
 }
 
 func (x *accountsInteractor) UpdatePassword(arg entities.UpdatePasswordAccountDTO) (err error) {
-	id, err := utils.ChiperDecrypt(arg.RequestID, configs.Config.SECRET_KEY)
+	id, err := utils.ChiperDecrypt(arg.RequestID, x.cfg.JWT_SECRET)
 	if err != nil {
 		return
 	}

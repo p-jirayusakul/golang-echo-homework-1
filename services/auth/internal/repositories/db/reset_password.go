@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/common"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/entities"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories/models"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories/db/models"
 	"gorm.io/gorm"
 )
 

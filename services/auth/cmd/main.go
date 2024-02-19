@@ -6,29 +6,33 @@ import (
 	"os"
 
 	"github.com/labstack/echo/v4"
-	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/configs"
 	pkg_middleware "github.com/p-jirayusakul/golang-echo-homework-1/pkg/middleware"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/validator"
 
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/config"
-	user_handler "github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/handlers"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/handlers/grpc_client"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/delivery/grpc_client"
+	accounts_handler "github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/delivery/http/delivery/auth"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories/factories"
+)
+
+const fileEnv = "env/auth/.env"
+
+var (
+	cfg       = config.Auth(fileEnv)
+	db        = config.InitDatabase(fileEnv)
+	dbFactory = factories.NewDBFactory(db)
 )
 
 func main() {
 
-	// Load config
-	configs.LoadConfig(".env")
+	// run rpc client
+	grpcClient, errs := grpc_client.NewGrpcClient(cfg)
+	if len(errs) > 0 {
+		log.Fatalf("did not connect grpc client: %v", errs)
+	}
 
 	// App
 	app := echo.New()
-
-	// Repository
-	db := config.InitDatabase()
-	repoAccount := repositories.NewAccountRepository(db)
-	repoResetPassword := repositories.NewResetPasswordRepository(db)
 
 	// Middlewere
 	app.Validator = validator.NewCustomValidator()
@@ -37,15 +41,19 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	app.Use(pkg_middleware.LogHandler(logger))
 
-	grpcClient, errs := grpc_client.NewGrpcClient()
-	if len(errs) > 0 {
-		log.Fatalf("did not connect grpc client: %v", errs)
-		panic(errs)
-	}
-
-	grpcFactory := factories.NewGrpcFactory(grpcClient)
+	// setup rounter
+	initHandler(app, cfg, grpcClient)
 
 	// Handler
-	user_handler.NewAuthHttpHandler(app, &repoAccount, &repoResetPassword, grpcFactory)
-	app.Logger.Fatal(app.Start(":3001"))
+	app.Logger.Fatal(app.Start(cfg.HTTP_PORT))
+}
+
+func initHandler(
+	app *echo.Echo,
+	cfg *config.AuthConfig,
+	grpcClient *grpc_client.ServerClient,
+) {
+
+	grpcClientFactory := factories.NewGrpcFactory(grpcClient)
+	accounts_handler.NewAuthHttpHandler(app, cfg, dbFactory, grpcClientFactory)
 }
