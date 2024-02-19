@@ -10,9 +10,9 @@ import (
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/repositories/db/models"
 )
 
-func InitDatabase() *gorm.DB {
+func InitDatabase(filename string) *gorm.DB {
 
-	cfg := configs.DatabasePostgres()
+	cfg := configs.DatabasePostgres(filename)
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Bangkok", cfg.Host, cfg.User, cfg.Password, cfg.Database, cfg.Port)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

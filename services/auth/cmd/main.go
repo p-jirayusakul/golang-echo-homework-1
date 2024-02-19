@@ -20,7 +20,7 @@ import (
 func main() {
 
 	// Load config
-	configs.LoadConfig()
+	configs.LoadConfig(".env")
 
 	// App
 	app := echo.New()

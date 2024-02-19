@@ -8,35 +8,33 @@ import (
 	"os"
 
 	"github.com/labstack/echo/v4"
-	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/configs"
 	pkg_middleware "github.com/p-jirayusakul/golang-echo-homework-1/pkg/middleware"
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/validator"
 	"google.golang.org/grpc"
-	"gorm.io/gorm"
 
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/config"
-	user_handler "github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/handlers"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/handlers/grpc_server"
-	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/repositories"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/delivery/grpc_server"
+	address_handler "github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/delivery/http/delivery/address"
+	profiles_handler "github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/delivery/http/delivery/profiles"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/repositories/factories"
+)
+
+const fileEnv = "env/users/.env"
+
+var (
+	cfg       = config.User(fileEnv)
+	db        = config.InitDatabase(fileEnv)
+	dbFactory = factories.NewDBFactory(db)
 )
 
 func main() {
 
-	// Load config
-	configs.LoadConfig()
-
-	db := config.InitDatabase()
-
 	// run Grpc Server
-	go RunGrpcServer(db)
+	go RunGrpcServer()
 	// end run Grpc Server
 
 	// App
 	app := echo.New()
-
-	// Repository
-	repoProfile := repositories.NewProfileRepository(db)
-	repoAddress := repositories.NewAddressRepository(db)
 
 	// Middlewere
 	app.Validator = validator.NewCustomValidator()
@@ -45,23 +43,33 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	app.Use(pkg_middleware.LogHandler(logger))
 
+	// setup rounter
+	initHandler(app, cfg)
+
 	// Handler
-	user_handler.NewUserHttpHandler(app, &repoProfile, &repoAddress)
-	app.Logger.Fatal(app.Start(":3002"))
+	app.Logger.Fatal(app.Start(":" + cfg.HTTP_PORT))
 }
 
-func RunGrpcServer(db *gorm.DB) {
+func RunGrpcServer() {
 
 	grpcServer := grpc.NewServer()
-	grpc_server.HandlerUserServices(grpcServer, db)
+	grpc_server.HandlerUserServices(grpcServer, db, *cfg)
 
-	lis, err := net.Listen("tcp", configs.Config.RPC_USERS_PORT)
+	lis, err := net.Listen("tcp", cfg.RPC_PORT)
 	if err != nil {
 		log.Fatalln("Failed to listen:", err)
 	}
 
 	go func() {
-		log.Println(fmt.Sprintf("Grpc Server listen to: %s", configs.Config.RPC_USERS_PORT))
+		log.Println(fmt.Sprintf("Grpc Server listen to: %s", cfg.RPC_PORT))
 		log.Fatal(grpcServer.Serve(lis))
 	}()
+}
+
+func initHandler(
+	app *echo.Echo,
+	cfg *config.UserConfig) {
+
+	profiles_handler.NewProfilesHttpHandler(app, cfg, dbFactory)
+	address_handler.NewAddressHttpHandler(app, cfg, dbFactory)
 }

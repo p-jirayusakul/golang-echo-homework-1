@@ -3,14 +3,16 @@ package configs
 import (
 	"os"
 	"strconv"
+
+	"github.com/spf13/viper"
 )
 
 type DatabasePostgresConfig struct {
-	Host     string
-	Port     int
-	Database string
-	User     string
-	Password string
+	Host     string `mapstructure:"DATABASE_HOST"`
+	Port     int    `mapstructure:"DATABASE_PORT"`
+	Database string `mapstructure:"DATABASE_NAME"`
+	User     string `mapstructure:"DATABASE_USER"`
+	Password string `mapstructure:"DATABASE_PASSWORD"`
 }
 
 func ConvertInt(env string) int {
@@ -18,12 +20,15 @@ func ConvertInt(env string) int {
 	return v
 }
 
-func DatabasePostgres() DatabasePostgresConfig {
-	return DatabasePostgresConfig{
-		Host:     os.Getenv("DATABASE_HOST"),
-		Port:     ConvertInt(os.Getenv("DATABASE_PORT")),
-		Database: os.Getenv("DATABASE_NAME"),
-		User:     os.Getenv("DATABASE_USER"),
-		Password: os.Getenv("DATABASE_PASSWORD"),
+func DatabasePostgres(filename string) DatabasePostgresConfig {
+
+	if _, err := os.Stat(filename); err == nil {
+		viper.SetConfigFile(filename)
+		viper.ReadInConfig()
 	}
+
+	var config DatabasePostgresConfig
+	viper.Unmarshal(&config)
+
+	return config
 }
