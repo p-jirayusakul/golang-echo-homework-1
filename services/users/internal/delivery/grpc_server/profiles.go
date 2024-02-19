@@ -12,6 +12,7 @@ import (
 )
 
 func (x *server) CreateProfiles(ctx context.Context, req *userPb.CreateProfilesRequest) (*userPb.CreateProfilesResponse, error) {
+
 	firstName := req.GetFirstName()
 	lastName := req.GetLastName()
 	phone := req.GetPhone()

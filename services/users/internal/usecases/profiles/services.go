@@ -4,18 +4,23 @@ import (
 	"github.com/google/uuid"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/domain/entities"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/domain/repositories"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/config"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/repositories/factories"
 )
 
 type profilesInteractor struct {
+	cfg          *config.UserConfig
 	profilesRepo repositories.ProfilesRepository
 }
 
 func NewProfilesInteractor(
-	profilesRepo repositories.ProfilesRepository,
+	config *config.UserConfig,
+	dbFactory *factories.DBFactory,
 ) *profilesInteractor {
 
 	return &profilesInteractor{
-		profilesRepo: profilesRepo,
+		cfg:          config,
+		profilesRepo: dbFactory.ProfilesRepo,
 	}
 }
 

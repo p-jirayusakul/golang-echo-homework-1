@@ -4,18 +4,23 @@ import (
 	"github.com/google/uuid"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/domain/entities"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/domain/repositories"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/config"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/users/internal/repositories/factories"
 )
 
 type addressInteractor struct {
+	cfg         *config.UserConfig
 	addressRepo repositories.AddressRepository
 }
 
 func NewAddressInteractor(
-	addressRepo repositories.AddressRepository,
+	config *config.UserConfig,
+	dbFactory *factories.DBFactory,
 ) *addressInteractor {
 
 	return &addressInteractor{
-		addressRepo: addressRepo,
+		cfg:         config,
+		addressRepo: dbFactory.AddressRepo,
 	}
 }
 
