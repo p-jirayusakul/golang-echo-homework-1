@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"context"
 	"errors"
 
 	"github.com/google/uuid"
@@ -9,21 +10,25 @@ import (
 	"github.com/p-jirayusakul/golang-echo-homework-1/pkg/utils"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/entities"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/domain/repositories"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories/factories"
 )
 
 type accountsInteractor struct {
 	accountsRepo      repositories.AccountsRepository
 	resetPasswordRepo repositories.ResetPasswordRepository
+	usersGrpcRepo     repositories.UsersRepository
 }
 
 func NewAccountsInteractor(
 	accountsRepo repositories.AccountsRepository,
 	resetPasswordRepo repositories.ResetPasswordRepository,
+	grpcFactory *factories.GrpcClientFactory,
 ) *accountsInteractor {
 
 	return &accountsInteractor{
 		accountsRepo:      accountsRepo,
 		resetPasswordRepo: resetPasswordRepo,
+		usersGrpcRepo:     grpcFactory.UsersRepo,
 	}
 }
 
@@ -52,6 +57,18 @@ func (x *accountsInteractor) Create(arg entities.Accounts) (id string, err error
 	}
 
 	id = userId.String()
+
+	// create profilse
+	profiles := entities.Profiles{
+		UserID: id,
+		Email:  arg.Email,
+	}
+
+	err = x.usersGrpcRepo.CreateProfiles(context.Background(), &profiles)
+	if err != nil {
+		return
+	}
+
 	return
 }
 

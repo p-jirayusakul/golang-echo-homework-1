@@ -72,7 +72,7 @@ func (h *UserHandler) createProfiles(c echo.Context) error {
 	userId.Scan(r.UserID)
 	arg.UserID = userId
 
-	err = h.profilesUsecase.Create(arg)
+	err = h.profilesUsecase.CreateProfiles(arg)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

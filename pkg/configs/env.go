@@ -19,6 +19,8 @@ type envConfigs struct {
 	DATABASE_NAME     string `mapstructure:"DATABASE_NAME"`
 	JWT_SECRET        string `mapstructure:"JWT_SECRET"`
 	SECRET_KEY        string `mapstructure:"SECRET_KEY"`
+	RPC_USERS         string `mapstructure:"RPC_USERS"`
+	RPC_USERS_PORT    string `mapstructure:"RPC_USERS_PORT"`
 }
 
 // Call to load the variables from env
@@ -42,6 +44,7 @@ func LoadConfig() (err error) {
 			fmt.Println("Error:", err)
 			return err
 		}
+
 		viper.SetDefault("DATABASE_PORT", int32(DATABASE_PORT_NUM))
 		viper.SetDefault("DATABASE_USER", os.Getenv("DATABASE_USER"))
 		viper.SetDefault("DATABASE_HOST", os.Getenv("DATABASE_HOST"))
@@ -49,6 +52,9 @@ func LoadConfig() (err error) {
 		viper.SetDefault("DATABASE_NAME", os.Getenv("DATABASE_NAME"))
 		viper.SetDefault("JWT_SECRET", os.Getenv("JWT_SECRET"))
 		viper.SetDefault("SECRET_KEY", os.Getenv("SECRET_KEY"))
+		viper.SetDefault("RPC_USERS", os.Getenv("RPC_USERS"))
+		viper.SetDefault("RPC_USERS", os.Getenv("RPC_USERS"))
+		viper.SetDefault("RPC_USERS_PORT", os.Getenv("RPC_USERS_PORT"))
 	}
 
 	if err = viper.Unmarshal(&Config); err != nil {

@@ -15,6 +15,7 @@ import (
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/handlers/request"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/handlers/response"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories/factories"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/usecases/accounts"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/usecases/reset_password"
 )
@@ -28,11 +29,13 @@ func NewAuthHttpHandler(
 	app *echo.Echo,
 	accountsRepo *repositories.AccountsRepository,
 	resetPasswordRepo *repositories.ResetPasswordRepository,
+	grpcFactory *factories.GrpcClientFactory,
 ) {
 	handler := &AuthHandler{
 		accountsUsecase: accounts.NewAccountsInteractor(
 			accountsRepo,
 			resetPasswordRepo,
+			grpcFactory,
 		),
 		resetPasswordUsecase: reset_password.NewResetPasswordInteractor(
 			resetPasswordRepo,

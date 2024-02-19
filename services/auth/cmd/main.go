@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"log/slog"
 	"os"
 
@@ -11,7 +12,9 @@ import (
 
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/config"
 	user_handler "github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/handlers"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/handlers/grpc_client"
 	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories"
+	"github.com/p-jirayusakul/golang-echo-homework-1/services/auth/internal/repositories/factories"
 )
 
 func main() {
@@ -34,7 +37,15 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	app.Use(pkg_middleware.LogHandler(logger))
 
+	grpcClient, errs := grpc_client.NewGrpcClient()
+	if len(errs) > 0 {
+		log.Fatalf("did not connect grpc client: %v", errs)
+		panic(errs)
+	}
+
+	grpcFactory := factories.NewGrpcFactory(grpcClient)
+
 	// Handler
-	user_handler.NewAuthHttpHandler(app, &repoAccount, &repoResetPassword)
+	user_handler.NewAuthHttpHandler(app, &repoAccount, &repoResetPassword, grpcFactory)
 	app.Logger.Fatal(app.Start(":3001"))
 }
