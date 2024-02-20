@@ -2,7 +2,24 @@
 Github ต้นฉบับ
 https://github.com/febrihidayan/go-architecture-monorepo.git
 
-## Localhost Run
+## Features
+ - Register
+ - Login
+ - Auth
+ - CRUD with GORM user_profiles, user_address
+
+## Tech stack
+ - docker compose
+ - mono repo
+ - clean architecture
+ - golang echo
+ - go viper
+ - go validator
+ - gorm
+ - HTTP,GRPC
+ 
+
+## localhost run
 **run service users**:
 ``` bash
 go run services/users/cmd/main.go
