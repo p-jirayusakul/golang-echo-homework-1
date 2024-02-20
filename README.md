@@ -2,6 +2,9 @@
 Github ต้นฉบับ
 https://github.com/febrihidayan/go-architecture-monorepo.git
 
+Document Postman สำหรับทดสอบ
+https://documenter.getpostman.com/view/6440353/2sA2r9WNkV
+
 ## Features
  - Register
  - Login
