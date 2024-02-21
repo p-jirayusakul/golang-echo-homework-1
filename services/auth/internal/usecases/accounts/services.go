@@ -86,7 +86,7 @@ func (x *accountsInteractor) Read(email string) (result entities.Accounts, err e
 }
 
 func (x *accountsInteractor) UpdatePassword(arg entities.UpdatePasswordAccountDTO) (err error) {
-	id, err := utils.ChiperDecrypt(arg.RequestID, x.cfg.JWT_SECRET)
+	id, err := utils.ChiperDecrypt(arg.RequestID, x.cfg.SECRET_KEY)
 	if err != nil {
 		return
 	}
